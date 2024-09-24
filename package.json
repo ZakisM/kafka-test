@@ -4,9 +4,13 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"dev": "node src/index.js"
+		"producer": "node src/producer.js",
+		"consumer": "node src/consumer.js"
 	},
 	"keywords": [],
 	"author": "",
-	"license": "ISC"
+	"license": "ISC",
+	"dependencies": {
+		"kafkajs": "^2.2.4"
+	}
 }
