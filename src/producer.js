@@ -1,9 +1,12 @@
-const { Kafka, CompressionTypes, logLevel } = require("kafkajs");
+const { Kafka, CompressionTypes, logLevel } =
+  require("@confluentinc/kafka-javascript").KafkaJS;
 
 const kafka = new Kafka({
-  logLevel: logLevel.DEBUG,
-  brokers: ["localhost:9092"],
-  clientId: "example-producer",
+  kafkaJS: {
+    logLevel: logLevel.DEBUG,
+    brokers: ["localhost:9092"],
+    clientId: "example-producer",
+  },
 });
 
 const topic = "individual-record";

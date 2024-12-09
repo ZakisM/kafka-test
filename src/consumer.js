@@ -1,13 +1,15 @@
-const { Kafka, logLevel } = require("kafkajs");
+const { Kafka, logLevel } = require("@confluentinc/kafka-javascript").KafkaJS;
 
 const kafka = new Kafka({
-  logLevel: logLevel.INFO,
-  brokers: ["localhost:9092"],
-  clientId: "example-consumer",
+  kafkaJS: {
+    logLevel: logLevel.INFO,
+    brokers: ["localhost:9092"],
+    clientId: "example-consumer",
+  },
 });
 
 const topic = "individual-record";
-const consumer = kafka.consumer({ groupId: "test-group" });
+const consumer = kafka.consumer({ kafkaJS: { groupId: "test-group" } });
 
 const run = async () => {
   await consumer.connect();
