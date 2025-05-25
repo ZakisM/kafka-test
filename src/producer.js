@@ -1,34 +1,51 @@
-const { Kafka, CompressionTypes, logLevel } =
-  require("@confluentinc/kafka-javascript").KafkaJS;
+const { Kafka, CompressionTypes, logLevel } = require("kafkajs");
+const { SchemaRegistry, SchemaType } = require("@kafkajs/confluent-schema-registry");
 
 const kafka = new Kafka({
-  kafkaJS: {
-    logLevel: logLevel.DEBUG,
-    brokers: ["localhost:9092"],
-    clientId: "example-producer",
-  },
+  logLevel: logLevel.DEBUG,
+  brokers: ["localhost:9092"],
+  clientId: "example-producer",
 });
 
 const topic = "individual-record";
 const producer = kafka.producer();
+const registry = new SchemaRegistry({
+  host: process.env.SCHEMA_REGISTRY_HOST || "http://localhost:8081",
+});
+
+// Define a simple Avro schema (replace with your actual schema)
+const schema = {
+  type: "record",
+  name: "RandomNumber",
+  fields: [
+    { name: "key", type: "string" },
+    { name: "value", type: "string" },
+  ],
+};
+
+let registryId;
 
 const getRandomNumber = () => Math.round(Math.random(10) * 1000);
-const createMessage = (num) => ({
-  key: `key-${num}`,
-  value: `value-${num}-${new Date().toISOString()}`,
-});
+const createMessage = async (num) => {
+  const message = {
+    key: `key-${num}`,
+    value: `value-${num}-${new Date().toISOString()}`,
+  };
+  // Encode the message payload using the schema registry
+  const payload = await registry.encode(registryId, message);
+  return { key: message.key, value: payload };
+};
+
 
 const sendMessage = async () => {
   try {
+    const num = getRandomNumber();
+    const message = await createMessage(num); // Updated to use async createMessage
+
     const data = await producer.send({
       topic,
       compression: CompressionTypes.GZIP,
-      messages: [
-        {
-          key: `key-${getRandomNumber()}`,
-          value: `value-${new Date().toISOString()}`,
-        },
-      ],
+      messages: [message], // Ensure message is in the correct format
     });
 
     return console.log(data);
@@ -39,6 +56,12 @@ const sendMessage = async () => {
 
 const run = async () => {
   await producer.connect();
+  // Register the schema and get the ID
+  const { id } = await registry.register({
+    type: SchemaType.AVRO,
+    schema: JSON.stringify(schema),
+  });
+  registryId = id;
 
   setInterval(sendMessage, 3000);
 };

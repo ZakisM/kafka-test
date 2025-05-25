@@ -5,12 +5,18 @@
   "main": "index.js",
   "scripts": {
     "producer": "node src/producer.js",
-    "consumer": "node src/consumer.js"
+    "consumer": "node src/consumer.js",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@confluentinc/kafka-javascript": "^0.2.0"
+    "@kafkajs/confluent-schema-registry": "^3.3.0",
+    "avsc": "^5.7.7",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }
